@@ -5,6 +5,7 @@
  */
 package graphdiff;
 
+import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.ISOMLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import graphutil.GraphSerialization;
@@ -62,10 +63,13 @@ public class FXMLDocumentController implements Initializable {
     AnchorPane pane;
 
     @FXML
+    AnchorPane cbpane;
+
+    @FXML
     private Label label;
 
     @FXML
-    ComboBox cb;
+    ComboBox<String> comboBoxLayout;
 
     @FXML
     private void handleButtonAction(ActionEvent event) {
@@ -84,8 +88,9 @@ public class FXMLDocumentController implements Initializable {
                         "ISOMLayout",
                         "CircleLayout"
                 );
-        cb = new ComboBox(options);
-        cb.setValue("ISOMLayout");
+        comboBoxLayout = new ComboBox<>(options);
+        comboBoxLayout.setValue("ISOMLayout");
+        cbpane.getChildren().add(comboBoxLayout);
     }
 
     @FXML
@@ -134,23 +139,31 @@ public class FXMLDocumentController implements Initializable {
             pane.getChildren().remove(visA);
 
             //layout = new CircleLayout<>(A);
-            layout = new ISOMLayout<>(A);
+            switch (comboBoxLayout.getValue()) {
+                case "ISOMLayout":
+                    layout = new ISOMLayout<>(A);
+                    break;
+                case "CircleLayout":
+                        layout = new CircleLayout<>(A);      
+                break;
+                default:
+                    layout = new ISOMLayout<>(A);
+            }
 
-            VisualizationModel<GraphElements.MyVertex, String> vm1 = new DefaultVisualizationModel<>(layout, new Dimension(800, 800));
-            renderGraph(A, B, layout, visA);
-            pane.getChildren().add(visA);
-        } catch (Exception ex) {
+                    VisualizationModel<GraphElements.MyVertex, String> vm1 = new DefaultVisualizationModel<>(layout, new Dimension(800, 800));
+                    renderGraph(A, B, layout, visA);
+                    pane.getChildren().add(visA);
+            }catch (Exception ex) {
 
         }
-    }
-
-    /**
-     * Render a graph to a particular <code>Group</code>
-     *
-     * @param graph
-     * @param layout
-     * @param g
-     */
+        }
+        /**
+         * Render a graph to a particular <code>Group</code>
+         *
+         * @param graph
+         * @param layout
+         * @param g
+         */
     private void renderGraph(Graph<GraphElements.MyVertex, String> graph, Layout<GraphElements.MyVertex, String> layout, Group g) {
         // draw the vertices in the graph
         for (GraphElements.MyVertex v : graph.getVertices()) {
