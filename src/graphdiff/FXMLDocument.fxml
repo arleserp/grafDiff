@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="900.0" prefWidth="1005.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="graphdiff.FXMLDocumentController">
+   <children>
+      <VBox fx:id="vbMenu" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+               <MenuBar prefHeight="25.0" prefWidth="569.0">
+                 <menus>
+                   <Menu mnemonicParsing="false" text="File">
+                     <items>
+                       <MenuItem mnemonicParsing="false" onAction="#handleMenuLoadNetworkA" text="Load Network A" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleMenuLoadNetworkB" text="Load Network B" />
+                     </items>
+                   </Menu>
+                     <Menu mnemonicParsing="false" text="About" />
+                 </menus>
+               </MenuBar>
+            <AnchorPane fx:id="pane" prefHeight="800.0" prefWidth="890.0">
+               <children>
+                  <ComboBox fx:id="cb" layoutX="855.0" layoutY="2.0" prefWidth="150.0" />
+                  <Label layoutX="775.0" layoutY="6.0" text="Graph Layout" />
+               </children></AnchorPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
