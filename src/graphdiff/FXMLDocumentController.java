@@ -69,6 +69,9 @@ public class FXMLDocumentController implements Initializable {
     private Label label;
 
     @FXML
+    AnchorPane networksPane;
+
+    @FXML
     ComboBox<String> comboBoxLayout;
 
     @FXML
@@ -91,6 +94,23 @@ public class FXMLDocumentController implements Initializable {
         comboBoxLayout = new ComboBox<>(options);
         comboBoxLayout.setValue("ISOMLayout");
         cbpane.getChildren().add(comboBoxLayout);
+
+        // label.setText("");
+        comboBoxLayout.valueProperty().addListener((obs, oldItem, newItem) -> {
+//            //label.textProperty().unbind();
+            if (newItem == null) {
+                //label.setText("");
+            } else {
+                // label.textProperty().bind(newItem.detailsProperty());
+                //System.out.println("juju");
+                networksPane.getChildren().clear();
+                
+                initialize(url, rb);
+                if(A != null && B!= null){
+                    draw();
+                }
+            }
+        });
     }
 
     @FXML
@@ -98,7 +118,9 @@ public class FXMLDocumentController implements Initializable {
         //System.out.println("helloooooo!");
         Window stage = vbMenu.getScene().getWindow();
         fileChooser.setTitle("Choose a graph file");
-        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("graph file", "*.graph"));
+        //chooser.getExtensionFilters().add(extFilter);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("graph files (*.graph)", "*.graph");
+        fileChooser.getExtensionFilters().add(extFilter);
 
         try {
             fileA = fileChooser.showOpenDialog(stage);
@@ -114,10 +136,19 @@ public class FXMLDocumentController implements Initializable {
         System.out.println("A" + A);
         //layout = new CircleLayout<>(A);
         //layout = new ISOMLayout<>(A);
-
-        //VisualizationModel<GraphElements.MyVertex, String> vm1 = new DefaultVisualizationModel<>(layout, new Dimension(800, 800));
-        //renderGraph(A, layout, visA);
-        //pane.getChildren().add(visA);
+        switch (comboBoxLayout.getValue()) {
+            case "ISOMLayout":
+                layout = new ISOMLayout<>(A);
+                break;
+            case "CircleLayout":
+                layout = new CircleLayout<>(A);
+                break;
+            default:
+                layout = new ISOMLayout<>(A);
+        }
+        VisualizationModel<GraphElements.MyVertex, String> vm1 = new DefaultVisualizationModel<>(layout, new Dimension(800, 800));
+        renderGraph(A, layout, visA);
+        networksPane.getChildren().add(visA);
     }
 
     @FXML
@@ -136,34 +167,39 @@ public class FXMLDocumentController implements Initializable {
             System.out.println("file: " + fileB);
             B = GraphSerialization.loadDeserializeGraph(fileB.toString());
             System.out.println("B" + B);
-            pane.getChildren().remove(visA);
+            draw();
+        } catch (Exception ex) {
 
-            //layout = new CircleLayout<>(A);
-            switch (comboBoxLayout.getValue()) {
-                case "ISOMLayout":
-                    layout = new ISOMLayout<>(A);
-                    break;
-                case "CircleLayout":
-                        layout = new CircleLayout<>(A);      
+        }
+    }
+
+    private void draw() {
+        networksPane.getChildren().clear();
+        //layout = new CircleLayout<>(A);
+        switch (comboBoxLayout.getValue()) {
+            case "ISOMLayout":
+                layout = new ISOMLayout<>(A);
                 break;
-                default:
-                    layout = new ISOMLayout<>(A);
-            }
-
-                    VisualizationModel<GraphElements.MyVertex, String> vm1 = new DefaultVisualizationModel<>(layout, new Dimension(800, 800));
-                    renderGraph(A, B, layout, visA);
-                    pane.getChildren().add(visA);
-            }catch (Exception ex) {
-
+            case "CircleLayout":
+                layout = new CircleLayout<>(A);
+                break;
+            default:
+                layout = new ISOMLayout<>(A);
         }
-        }
-        /**
-         * Render a graph to a particular <code>Group</code>
-         *
-         * @param graph
-         * @param layout
-         * @param g
-         */
+
+        VisualizationModel<GraphElements.MyVertex, String> vm1 = new DefaultVisualizationModel<>(layout, new Dimension(800, 800));
+        renderGraph(A, B, layout, visA);
+        networksPane.getChildren().add(visA);
+
+    }
+
+    /**
+     * Render a graph to a particular <code>Group</code>
+     *
+     * @param graph
+     * @param layout
+     * @param g
+     */
     private void renderGraph(Graph<GraphElements.MyVertex, String> graph, Layout<GraphElements.MyVertex, String> layout, Group g) {
         // draw the vertices in the graph
         for (GraphElements.MyVertex v : graph.getVertices()) {

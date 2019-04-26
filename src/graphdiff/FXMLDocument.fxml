@@ -25,6 +25,7 @@
                <children>
                   <Label layoutX="733.0" layoutY="6.0" text="Graph Layout" />
                   <AnchorPane fx:id="cbpane" layoutX="805.0" layoutY="3.0" prefHeight="40.0" prefWidth="200.0" />
+                  <AnchorPane fx:id="networksPane" layoutX="5.0" layoutY="42.0" prefHeight="760.0" prefWidth="994.0" />
                </children></AnchorPane>
          </children>
       </VBox>
