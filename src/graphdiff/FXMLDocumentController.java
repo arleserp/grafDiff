@@ -16,10 +16,17 @@ import edu.uci.ics.jung.visualization.VisualizationModel;
 
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
+import java.io.BufferedWriter;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -53,6 +60,7 @@ public class FXMLDocumentController implements Initializable {
     Group visA;
     Graph<GraphElements.MyVertex, String> A;
     Graph<GraphElements.MyVertex, String> B;
+
     Layout<GraphElements.MyVertex, String> layout = null;
     private static final int CIRCLE_SIZE = 10; // default circle size
 
@@ -104,9 +112,9 @@ public class FXMLDocumentController implements Initializable {
                 // label.textProperty().bind(newItem.detailsProperty());
                 //System.out.println("juju");
                 networksPane.getChildren().clear();
-                
+
                 initialize(url, rb);
-                if(A != null && B!= null){
+                if (A != null && B != null) {
                     draw();
                 }
             }
@@ -152,7 +160,6 @@ public class FXMLDocumentController implements Initializable {
     }
 
     @FXML
-
     private void handleMenuLoadNetworkB(ActionEvent event) {
         //System.out.println("helloooooo!");        
         Window stage = vbMenu.getScene().getWindow();
@@ -160,7 +167,7 @@ public class FXMLDocumentController implements Initializable {
         fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("graph file", "*.graph"));
         visA = new Group();
         try {
-            File fileB = fileChooser.showOpenDialog(stage);
+            fileB = fileChooser.showOpenDialog(stage);
             System.out.println("opeeeen");
             fileChooser.setInitialDirectory(fileB.getParentFile());
             //TODO load file
@@ -171,6 +178,67 @@ public class FXMLDocumentController implements Initializable {
         } catch (Exception ex) {
 
         }
+    }
+
+    @FXML
+    private void handleMenuExportNetworkDiff(ActionEvent event) {
+        if (A == null) {
+            System.out.println("You must load network A");
+        }
+        if (B == null) {
+            System.out.println("You must load network B");
+        }
+        try {
+            //node file            
+            System.out.println("Filename: " + fileB.getName());
+            String nodeCSV = fileB.getName().replace("graph", "diff.node.csv");
+            String edgeCSV = fileB.getName().replace("graph", "diff.edge.csv");
+
+            PrintWriter nodeCSVFile;
+            nodeCSVFile = new PrintWriter(new BufferedWriter(new FileWriter(nodeCSV, true)));
+            int nodeId = 0;
+            HashMap<String, Integer> dictIds = new HashMap<>();
+            nodeCSVFile.println("Id,Label,State");
+
+            // draw the vertices in the graph
+            for (GraphElements.MyVertex v : A.getVertices()) {
+                // Get the position of the vertex                
+                if (containsVertex(B, v.getName())) {
+                    nodeCSVFile.println(nodeId + "," + v.getName() + ",Recovered");
+                } else {
+                    nodeCSVFile.println(nodeId + "," + v.getName() + ",Failed");
+                }
+                dictIds.put(v.getName(), nodeId++);
+            }
+
+            PrintWriter edgeCSVFile = new PrintWriter(new BufferedWriter(new FileWriter(edgeCSV, true)));
+            edgeCSVFile.println("Source,Target,Type,State");
+
+            // draw the edges
+            //problem of implementation????? when i repair network structure I rename edges!
+            for (String ed : A.getEdges()) {
+                //System.out.println("edge"+ ed);
+                // get the end points of the edge
+                Pair<GraphElements.MyVertex> endpoints = A.getEndpoints(ed);
+                                                
+                //due to I generate edges with a different name! :(
+                String newname = "e" + endpoints.getFirst().getName() + endpoints.getSecond().getName();
+                String newnameB = "e" + endpoints.getSecond().getName() + endpoints.getFirst().getName();
+                String newnameC = "eb" + endpoints.getFirst().getName() + endpoints.getSecond().getName();
+                String newnameD = "eb" + endpoints.getSecond().getName() + endpoints.getFirst().getName();
+                if (!B.containsEdge(ed) && !B.containsEdge(newname) && !B.containsEdge(newnameB) && !B.containsEdge(newnameC) && !B.containsEdge(newnameD)) {
+                   edgeCSVFile.println(dictIds.get(endpoints.getFirst().getName()) + "," + dictIds.get(endpoints.getSecond().getName()) + ",Directed,EdgeFailed");                    
+                }else{
+                    edgeCSVFile.println(dictIds.get(endpoints.getFirst().getName()) + "," + dictIds.get(endpoints.getSecond().getName()) + ",Directed,EdgeRecovered");
+                }                        
+            }
+            nodeCSVFile.close();
+            edgeCSVFile.close();
+        } catch (IOException ex) {
+            Logger.getLogger(FXMLDocumentController.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
     private void draw() {

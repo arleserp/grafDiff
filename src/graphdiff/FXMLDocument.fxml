@@ -16,6 +16,7 @@
                      <items>
                        <MenuItem mnemonicParsing="false" onAction="#handleMenuLoadNetworkA" text="Load Network A" />
                         <MenuItem mnemonicParsing="false" onAction="#handleMenuLoadNetworkB" text="Load Network B" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleMenuExportNetworkDiff" text="Export diff to csv (gephi compatible)" />
                      </items>
                    </Menu>
                      <Menu mnemonicParsing="false" text="About" />
